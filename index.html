@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Електронний Журнал | МЕП-101</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        body { background-color: #0f172a; color: #f8fafc; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 20px; }
+        .header { text-align: center; margin-bottom: 25px; }
+        .header h1 { color: #38bdf8; font-size: 22px; margin-bottom: 5px; }
+        .header p { color: #94a3b8; font-size: 13px; }
+        .container { width: 100%; max-width: 800px; background: #1e293b; border-radius: 16px; padding: 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
+        .student-info { margin-bottom: 20px; border-bottom: 1px solid #334155; padding-bottom: 15px; }
+        .student-name { font-size: 20px; font-weight: bold; color: #f1f5f9; }
+        .group-badge { display: inline-block; background: #0284c7; color: white; padding: 3px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; margin-top: 5px; }
+        
+        .tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+        .tab-btn { background: #334155; color: #cbd5e1; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 14px; transition: all 0.2s; }
+        .tab-btn:hover { background: #475569; }
+        .tab-btn.active { background: #0284c7; color: white; font-weight: bold; }
+
+        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 25px; }
+        .stat-card { background: #0f172a; padding: 12px; border-radius: 10px; text-align: center; border: 1px solid #334155; }
+        .stat-val { font-size: 22px; font-weight: bold; color: #38bdf8; }
+        .stat-lbl { font-size: 11px; color: #94a3b8; margin-top: 3px; }
+
+        .subject-block { margin-bottom: 25px; }
+        .subject-title { color: #38bdf8; font-size: 16px; font-weight: 700; margin-bottom: 12px; border-bottom: 1px solid #334155; padding-bottom: 6px; }
+        
+        .grades-list { display: flex; flex-direction: column; gap: 8px; }
+        .grade-item { background: #0f172a; border-radius: 8px; padding: 10px 14px; border: 1px solid #334155; display: flex; justify-content: space-between; align-items: center; }
+        .grade-item.attended { border-left: 4px solid #22c55e; }
+        .grade-item.no-notes { border-left: 4px solid #ef4444; }
+        
+        .lesson-info { display: flex; flex-direction: column; }
+        .lesson-type { font-size: 13px; font-weight: 600; color: #e2e8f0; }
+        .lesson-date { font-size: 11px; color: #64748b; margin-top: 2px; }
+        
+        .grade-badge { font-size: 16px; font-weight: bold; color: #38bdf8; min-width: 30px; text-align: right; }
+        .grade-badge.red { color: #ef4444; }
+
+        .btn-exit { display: block; width: 100%; margin-top: 20px; padding: 12px; background: #334155; color: #f8fafc; text-align: center; border-radius: 8px; text-decoration: none; font-weight: 600; cursor: pointer; border: none; }
+        .btn-exit:hover { background: #475569; }
+
+        .login-box { background: #1e293b; padding: 30px; border-radius: 16px; width: 100%; max-width: 380px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.3); margin: auto; }
+        .login-box input { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #334155; background: #0f172a; color: white; margin: 15px 0; text-align: center; font-size: 18px; letter-spacing: 2px; }
+        .login-box button { width: 100%; padding: 12px; background: #0284c7; color: white; border: none; border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer; }
+        .login-box button:hover { background: #0369a1; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>Електронний Журнал | МЕП-101</h1>
+        <p>Зведений кабінет успішності студента</p>
+    </div>
+
+    <div id="loginSection" class="login-box">
+        <h2 style="font-size: 18px; color: #f1f5f9;">Вхід до кабінету</h2>
+        <input type="password" id="pinInput" placeholder="Введіть PIN" maxlength="10">
+        <button onclick="login()">Увійти</button>
+        <p id="errorMsg" style="color: #ef4444; font-size: 13px; margin-top: 10px; display: none;"></p>
+    </div>
+
+    <div id="dashboardSection" class="container" style="display: none;">
+        <div class="student-info">
+            <div class="student-name" id="studentName">—</div>
+            <div class="group-badge">ГРУПА: МЕП-101</div>
+        </div>
+
+        <div class="tabs" id="tabsList"></div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-val" id="avgGrade">0.0</div>
+                <div class="stat-lbl">Середній бал</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-val" id="completedCount">0</div>
+                <div class="stat-lbl">Виконанні роботи</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-val" id="debtsCount">0</div>
+                <div class="stat-lbl">Заборгованості</div>
+            </div>
+        </div>
+
+        <div id="subjectsContainer"></div>
+
+        <button class="btn-exit" onclick="logout()">Вийти з кабінету</button>
+    </div>
+
+    <script>
+        const API_URL = "https://script.google.com/macros/s/AKfycby0BttYn-a-ynOqy3Bqo4Mf3zdngW-087xXtboqRc56UZMJBtwSApFEASRmB_ZPIClvNQ/exec";
+        let globalData = null;
+        let currentSubject = "ALL";
+
+        function login() {
+            const pin = document.getElementById('pinInput').value.trim();
+            if (!pin) return;
+
+            document.getElementById('errorMsg').style.display = 'none';
+
+            const script = document.createElement('script');
+            script.src = `${API_URL}?pin=${encodeURIComponent(pin)}&callback=handleResponse`;
+            script.onerror = function() {
+                document.getElementById('errorMsg').innerText = "Помилка зв'язку з сервером";
+                document.getElementById('errorMsg').style.display = 'block';
+            };
+            document.body.appendChild(script);
+        }
+
+        function handleResponse(res) {
+            if (res && res.status === 'success' && res.data) {
+                globalData = res.data;
+                document.getElementById('loginSection').style.display = 'none';
+                document.getElementById('dashboardSection').style.display = 'block';
+                document.getElementById('studentName').innerText = res.data.name || 'Студент';
+                
+                renderTabs();
+                renderData();
+            } else {
+                const errorMsg = document.getElementById('errorMsg');
+                errorMsg.innerText = (res && res.message) ? res.message : 'Студента не знайдено';
+                errorMsg.style.display = 'block';
+            }
+        }
+
+        function renderTabs() {
+            const tabsList = document.getElementById('tabsList');
+            tabsList.innerHTML = `<button class="tab-btn ${currentSubject === 'ALL' ? 'active' : ''}" onclick="switchSubject('ALL')">Усі предмети</button>`;
+            
+            if (globalData && globalData.subjects) {
+                globalData.subjects.forEach(sub => {
+                    const activeClass = (currentSubject === sub.subjectName) ? 'active' : '';
+                    tabsList.innerHTML += `<button class="tab-btn ${activeClass}" onclick="switchSubject('${sub.subjectName}')">${sub.subjectName}</button>`;
+                });
+            }
+        }
+
+        function switchSubject(subjectName) {
+            currentSubject = subjectName;
+            renderTabs();
+            renderData();
+        }
+
+        function renderData() {
+            const container = document.getElementById('subjectsContainer');
+            container.innerHTML = '';
+
+            if (!globalData || !globalData.subjects) return;
+
+            let totalSum = 0;
+            let totalGradesCount = 0;
+            let totalCompleted = 0;
+            let totalDebts = 0;
+
+            const subjectsToRender = (currentSubject === 'ALL') 
+                ? globalData.subjects 
+                : globalData.subjects.filter(s => s.subjectName === currentSubject);
+
+            subjectsToRender.forEach(sub => {
+                const subBlock = document.createElement('div');
+                subBlock.className = 'subject-block';
+
+                const subTitle = document.createElement('div');
+                subTitle.className = 'subject-title';
+                subTitle.innerText = sub.subjectName;
+                subBlock.appendChild(subTitle);
+
+                const list = document.createElement('div');
+                list.className = 'grades-list';
+
+                if (sub.grades && sub.grades.length > 0) {
+                    sub.grades.forEach(g => {
+                        const valStr = (g.value || '').toString().trim();
+                        const valNum = parseFloat(valStr);
+
+                        if (!isNaN(valNum)) {
+                            totalSum += valNum;
+                            totalGradesCount++;
+                            totalCompleted++;
+                        } else if (valStr !== '') {
+                            totalCompleted++;
+                        }
+
+                        if (g.noNotes || valStr === '0' || valStr === '2') {
+                            totalDebts++;
+                        }
+
+                        const item = document.createElement('div');
+                        item.className = `grade-item ${g.attended ? 'attended' : ''} ${g.noNotes ? 'no-notes' : ''}`;
+                        item.innerHTML = `
+                            <div class="lesson-info">
+                                <div class="lesson-type">${g.type || 'Заняття'}</div>
+                                ${g.date ? `<div class="lesson-date">${g.date}</div>` : ''}
+                            </div>
+                            <div class="grade-badge ${g.noNotes ? 'red' : ''}">${valStr || '—'}</div>
+                        `;
+                        list.appendChild(item);
+                    });
+                } else {
+                    list.innerHTML = `<div style="color: #64748b; font-size: 13px; padding: 8px;">Оцінок поки немає</div>`;
+                }
+
+                subBlock.appendChild(list);
+                container.appendChild(subBlock);
+            });
+
+            document.getElementById('avgGrade').innerText = totalGradesCount > 0 ? (totalSum / totalGradesCount).toFixed(1) : '0.0';
+            document.getElementById('completedCount').innerText = totalCompleted;
+            document.getElementById('debtsCount').innerText = totalDebts;
+        }
+
+        function logout() {
+            document.getElementById('dashboardSection').style.display = 'none';
+            document.getElementById('loginSection').style.display = 'block';
+            document.getElementById('pinInput').value = '';
+            globalData = null;
+            currentSubject = "ALL";
+        }
+    </script>
+</body>
+</html>
